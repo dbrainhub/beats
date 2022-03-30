@@ -1,0 +1,26 @@
+- type: log
+
+#  # Change to true to enable this input configuration.
+#  enabled: true
+#  harvester_limit: 100
+#  #close_eof : true
+#  close_inactive : 10m
+#  #close_timeout : true
+#  ignore_older : 72h
+#  clean_inactive : 73h
+#  scan_frequency: 10s
+#  # Paths that should be crawled and fetched. Glob based paths.
+#  json.keys_under_root: true
+  paths:
+    - ./mysql-slow.log
+  exclude_files: [ '.gz$' ]
+  multiline:
+    pattern: '^(# User@Host: |# Time: )'
+    negate: true
+    match: after
+  exclude_lines: [ '^[\/\w\.]+, Version: .* started with:.*', '^# Time:.*' ]   # Exclude the header and time
+  processors:
+    - add_fields:
+        target: ''
+        fields:
+          ecs.version: 1.5.0
