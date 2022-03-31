@@ -23,15 +23,14 @@ import (
 )
 
 type rainhubConfig struct {
-	Hosts          		[]string               	`config:"hosts"`
-	BatchSize         	int                  	`config:"batch_size"`
-	RetryLimit        	int                  	`config:"retry_limit"`
-	Timeout			  	time.Duration 	   		`config:"timeout"`
+	Hosts      []string      `config:"hosts"`
+	BatchSize  int           `config:"batch_size"`
+	RetryLimit int           `config:"retry_limit"`
+	Timeout    time.Duration `config:"timeout"`
 }
 
-
 func (c *rainhubConfig) Validate() error {
-	if c.BatchSize <=0 || c.Hosts == nil {
+	if c.BatchSize <= 0 || c.Hosts == nil {
 		return fmt.Errorf("dbrainhub config params error")
 	}
 
