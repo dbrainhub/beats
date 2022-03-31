@@ -10,8 +10,10 @@ filebeat.config:
     # Reload module configs as they change:
     reload.enabled: true
 
-output.rainhub:
+output.dbrainhub:
   hosts: ["127.0.0.1:10010"]
   batch_size: 20480
   retry_limit: 5
   timeout: 2
+
+http.enabled: true

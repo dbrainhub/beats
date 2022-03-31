@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package rainhub
+package dbrainhub
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ import (
 )
 
 func init() {
-	outputs.RegisterType("rainhub", makeRH)
+	outputs.RegisterType("dbrainhub", makeRH)
 }
 
 func makeRH(
@@ -49,11 +49,11 @@ func makeRH(
 	clients := make([]outputs.NetworkClient, len(hosts))
 
 	for i := 0; i < len(hosts); i++ {
-		clients[i] = &rainhubClient{
+		clients[i] = &dbRainhubClient{
 			observer:	observer,
-			endpoint: 	fmt.Sprintf("http://%s/rainhub", hosts[i]),
+			endpoint: 	fmt.Sprintf("http://%s/dbrainhub", hosts[i]),
 			timeout:  	config.Timeout,
-			log: 	  	logp.NewLogger("rainhub"),
+			log: 	  	logp.NewLogger("dbrainhub"),
 		}
 	}
 

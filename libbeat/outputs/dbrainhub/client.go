@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package rainhub
+package dbrainhub
 
 import (
 	"bytes"
@@ -31,16 +31,16 @@ import (
 	"github.com/elastic/beats/v7/libbeat/publisher"
 )
 
-// Client is a rainhub client.
-type rainhubClient struct {
+// Client is a dbrainhub client.
+type dbRainhubClient struct {
 	client				*http.Client
 	endpoint 			string
-	observer            outputs.Observer
+	observer			outputs.Observer
 	timeout				time.Duration
 	log 				*logp.Logger
 }
 
-func (hc *rainhubClient) Publish(ctx context.Context, batch publisher.Batch) error {
+func (hc *dbRainhubClient) Publish(ctx context.Context, batch publisher.Batch) error {
 	events := batch.Events()
 
 	var buf bytes.Buffer
@@ -71,7 +71,7 @@ func (hc *rainhubClient) Publish(ctx context.Context, batch publisher.Batch) err
 	return nil
 }
 
-func (hc *rainhubClient) Connect() error {
+func (hc *dbRainhubClient) Connect() error {
 	hc.client = &http.Client{
 		Timeout: hc.timeout,
 		Transport: &http.Transport{
@@ -81,11 +81,11 @@ func (hc *rainhubClient) Connect() error {
 	return nil
 }
 
-func (hc *rainhubClient) Close() error {
+func (hc *dbRainhubClient) Close() error {
 	hc.client = nil
 	return nil
 }
 
-func (hc *rainhubClient) String() string {
-	return "rainhub-" + hc.endpoint
+func (hc *dbRainhubClient) String() string {
+	return "dbrainhub-" + hc.endpoint
 }

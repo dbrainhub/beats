@@ -15,40 +15,25 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package rainhub
+package dbrainhub
 
 import (
-	"testing"
-
-	"github.com/elastic/beats/v7/libbeat/beat"
-	"github.com/elastic/beats/v7/libbeat/common"
-	"github.com/elastic/beats/v7/libbeat/outputs"
-	"github.com/stretchr/testify/assert"
+	"fmt"
+	"time"
 )
 
-func TestMakeRH(t *testing.T) {
-	config := `
-hosts: ["127.0.0.1:8080"]
-batch_size: 10
-retry_limit: 5
-timeout: 2
-`
-	cfg := common.MustNewConfigFrom(config)
-	beatInfo := beat.Info{Beat: "libbeat", Version: "1.2.3"}
-	_, err := makeRH(nil, beatInfo, outputs.NewNilObserver(), cfg)
-	assert.NoError(t, err)
+type rainhubConfig struct {
+	Hosts          		[]string               	`config:"hosts"`
+	BatchSize         	int                  	`config:"batch_size"`
+	RetryLimit        	int                  	`config:"retry_limit"`
+	Timeout			  	time.Duration 	   		`config:"timeout"`
 }
 
-func TestMakeRHError(t *testing.T) {
-	config := `
-hosts:
-batch_size: 10
-retry_limit: 5
-timeout: 2
-`
-	cfg := common.MustNewConfigFrom(config)
-	beatInfo := beat.Info{Beat: "libbeat", Version: "1.2.3"}
-	_, err := makeRH(nil, beatInfo, outputs.NewNilObserver(), cfg)
-	assert.Error(t, err)
-}
 
+func (c *rainhubConfig) Validate() error {
+	if c.BatchSize <=0 || c.Hosts == nil {
+		return fmt.Errorf("dbrainhub config params error")
+	}
+
+	return nil
+}

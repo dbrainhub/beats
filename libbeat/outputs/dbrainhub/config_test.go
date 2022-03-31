@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package rainhub
+package dbrainhub
 
 import (
 	"testing"
@@ -53,7 +53,7 @@ timeout: 2
 `
 	c := common.MustNewConfigFrom(config)
 	_, err := readConfig(c)
-	assert.Errorf(t, err, "rainhub config params error")
+	assert.Errorf(t, err, "dbrainhub config params error")
 }
 
 func readConfig(cfg *common.Config) (*rainhubConfig, error) {

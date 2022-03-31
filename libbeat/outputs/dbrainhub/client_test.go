@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package rainhub
+package dbrainhub
 
 import (
 	"context"
@@ -42,11 +42,11 @@ func TestClientWithHeaders(t *testing.T) {
 	}))
 	defer ts.Close()
 
-	client := &rainhubClient{
+	client := &dbRainhubClient{
 		observer:	outputs.NewNilObserver(),
 		endpoint: 	ts.URL,
 		timeout:  	time.Duration(2000000000),
-		log: 	  	logp.NewLogger("rainhub"),
+		log: 	  	logp.NewLogger("dbrainhub"),
 	}
 	client.Connect()
 	defer  client.Close()
@@ -54,8 +54,8 @@ func TestClientWithHeaders(t *testing.T) {
 	// publish
 	event := beat.Event{Fields: common.MapStr{
 		"@timestamp": common.Time(time.Now()),
-		"type":       "rainhub",
-		"message":    "Test message from rainhub",
+		"type":       "dbrainhub",
+		"message":    "Test message from dbrainhub",
 	}}
 	batch := outest.NewBatch(event)
 	err := client.Publish(context.Background(), batch)
