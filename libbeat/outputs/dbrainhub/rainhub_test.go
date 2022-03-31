@@ -15,19 +15,40 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package includes
+package dbrainhub
 
 import (
-	// import queue types
-	_ "github.com/elastic/beats/v7/libbeat/outputs/codec/format"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/codec/json"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/console"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/elasticsearch"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/fileout"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/kafka"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/logstash"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/dbrainhub"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/redis"
-	_ "github.com/elastic/beats/v7/libbeat/publisher/queue/diskqueue"
-	_ "github.com/elastic/beats/v7/libbeat/publisher/queue/memqueue"
+	"testing"
+
+	"github.com/elastic/beats/v7/libbeat/beat"
+	"github.com/elastic/beats/v7/libbeat/common"
+	"github.com/elastic/beats/v7/libbeat/outputs"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestMakeRH(t *testing.T) {
+	config := `
+hosts: ["127.0.0.1:8080"]
+batch_size: 10
+retry_limit: 5
+timeout: 2
+`
+	cfg := common.MustNewConfigFrom(config)
+	beatInfo := beat.Info{Beat: "libbeat", Version: "1.2.3"}
+	_, err := makeRH(nil, beatInfo, outputs.NewNilObserver(), cfg)
+	assert.NoError(t, err)
+}
+
+func TestMakeRHError(t *testing.T) {
+	config := `
+hosts:
+batch_size: 10
+retry_limit: 5
+timeout: 2
+`
+	cfg := common.MustNewConfigFrom(config)
+	beatInfo := beat.Info{Beat: "libbeat", Version: "1.2.3"}
+	_, err := makeRH(nil, beatInfo, outputs.NewNilObserver(), cfg)
+	assert.Error(t, err)
+}
+

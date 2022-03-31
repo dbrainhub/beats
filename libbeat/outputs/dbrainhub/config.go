@@ -15,19 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package includes
+package dbrainhub
 
 import (
-	// import queue types
-	_ "github.com/elastic/beats/v7/libbeat/outputs/codec/format"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/codec/json"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/console"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/elasticsearch"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/fileout"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/kafka"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/logstash"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/dbrainhub"
-	_ "github.com/elastic/beats/v7/libbeat/outputs/redis"
-	_ "github.com/elastic/beats/v7/libbeat/publisher/queue/diskqueue"
-	_ "github.com/elastic/beats/v7/libbeat/publisher/queue/memqueue"
+	"fmt"
+	"time"
 )
+
+type rainhubConfig struct {
+	Hosts      []string      `config:"hosts"`
+	BatchSize  int           `config:"batch_size"`
+	RetryLimit int           `config:"retry_limit"`
+	Timeout    time.Duration `config:"timeout"`
+}
+
+func (c *rainhubConfig) Validate() error {
+	if c.BatchSize <= 0 || c.Hosts == nil {
+		return fmt.Errorf("dbrainhub config params error")
+	}
+
+	return nil
+}
