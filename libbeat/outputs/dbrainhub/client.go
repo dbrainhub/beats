@@ -33,11 +33,17 @@ import (
 
 // Client is a dbrainhub client.
 type dbRainhubClient struct {
-	client				*http.Client
-	endpoint 			string
-	observer			outputs.Observer
-	timeout				time.Duration
-	log 				*logp.Logger
+	client   *http.Client
+	endpoint string
+	observer outputs.Observer
+	timeout  time.Duration
+	log      *logp.Logger
+	dbIp     string
+	dbPort   int
+}
+
+type DbRainhubResponse struct {
+	FailedEvents []int32 `json:"failed_events,omitempty"`
 }
 
 func (hc *dbRainhubClient) Publish(ctx context.Context, batch publisher.Batch) error {
@@ -45,7 +51,11 @@ func (hc *dbRainhubClient) Publish(ctx context.Context, batch publisher.Batch) e
 
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	err := enc.Encode(events)
+	err := enc.Encode(map[string]interface{}{
+		"events":  events,
+		"db_ip":   hc.dbIp,
+		"db_port": hc.dbPort,
+	})
 	if err != nil {
 		hc.log.Errorf("Failed to encode events: %v", events)
 		return err
@@ -58,10 +68,41 @@ func (hc *dbRainhubClient) Publish(ctx context.Context, batch publisher.Batch) e
 	req.Header.Set("content-type", "application/json")
 	resp, err := hc.client.Do(req)
 	if err != nil {
-		batch.RetryEvents(events)
+		// error type
+		// TODO: limiter
+
+		// TODO: not classified
+
+		return err
 	} else {
-		hc.observer.Acked(len(events))
-		batch.ACK()
+		status := resp.StatusCode
+		if status == 200 {
+			// get and check failed events
+			var dbRainhubRes DbRainhubResponse
+			err = json.NewDecoder(resp.Body).Decode(&dbRainhubRes)
+			if err != nil {
+				return err
+			}
+			failedEvents := dbRainhubRes.FailedEvents
+			failedNo := len(failedEvents)
+			if failedNo == 0 {
+				// all success
+				hc.observer.Acked(len(events))
+				batch.ACK()
+			} else {
+				// retry the failed events
+				hc.observer.Failed(failedNo)
+				hc.observer.Acked(len(events) - failedNo)
+				retryEvents := make([]publisher.Event, failedNo)
+				for _, i := range failedEvents {
+					retryEvents = append(retryEvents, events[i])
+				}
+				batch.RetryEvents(retryEvents)
+			}
+		} else {
+			// failed and retry
+			batch.RetryEvents(events)
+		}
 	}
 
 	if resp != nil {

@@ -27,10 +27,12 @@ type rainhubConfig struct {
 	BatchSize  int           `config:"batch_size"`
 	RetryLimit int           `config:"retry_limit"`
 	Timeout    time.Duration `config:"timeout"`
+	DbIp       string        `config:"db_ip"`
+	DbPort     int           `config:"db_port"`
 }
 
 func (c *rainhubConfig) Validate() error {
-	if c.BatchSize <= 0 || c.Hosts == nil {
+	if c.BatchSize <= 0 || c.Hosts == nil || c.DbIp == "" || c.DbPort <= 0 {
 		return fmt.Errorf("dbrainhub config params error")
 	}
 
