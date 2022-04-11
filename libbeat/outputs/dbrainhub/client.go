@@ -31,6 +31,11 @@ import (
 	"github.com/elastic/beats/v7/libbeat/publisher"
 )
 
+const (
+	FilebeatRateLimited   = "FilebeatRateLimited"
+	DbMemberNotClassified = "DbMemberNotClassified"
+)
+
 // Client is a dbrainhub client.
 type dbRainhubClient struct {
 	client   *http.Client
@@ -68,11 +73,6 @@ func (hc *dbRainhubClient) Publish(ctx context.Context, batch publisher.Batch) e
 	req.Header.Set("content-type", "application/json")
 	resp, err := hc.client.Do(req)
 	if err != nil {
-		// error type
-		// TODO: limiter
-
-		// TODO: not classified
-
 		return err
 	} else {
 		status := resp.StatusCode
@@ -100,8 +100,22 @@ func (hc *dbRainhubClient) Publish(ctx context.Context, batch publisher.Batch) e
 				batch.RetryEvents(retryEvents)
 			}
 		} else {
-			// failed and retry
-			batch.RetryEvents(events)
+			// error type
+			var r map[string]interface{}
+			err = json.NewDecoder(resp.Body).Decode(&r)
+			if err != nil {
+				return err
+			}
+			if r["name"] == FilebeatRateLimited {
+				// limiter
+				hc.log.Errorf("dbrainhub output triggers the rate limit.")
+			} else if r["name"] == DbMemberNotClassified {
+				// not classified
+				hc.log.Errorf("db member should be assigned to a cluster first.")
+			} else {
+				// failed and retry
+				batch.RetryEvents(events)
+			}
 		}
 	}
 
