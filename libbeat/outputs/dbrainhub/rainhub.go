@@ -50,13 +50,14 @@ func makeRH(
 
 	for i := 0; i < len(hosts); i++ {
 		clients[i] = &dbRainhubClient{
-			observer:	observer,
-			endpoint: 	fmt.Sprintf("http://%s/dbrainhub", hosts[i]),
-			timeout:  	config.Timeout,
-			log: 	  	logp.NewLogger("dbrainhub"),
+			observer: observer,
+			endpoint: fmt.Sprintf("http://%s/dbrainhub/slowlogs", hosts[i]),
+			timeout:  config.Timeout,
+			log:      logp.NewLogger("dbrainhub"),
+			dbIp:     config.DbIp,
+			dbPort:   config.DbPort,
 		}
 	}
 
 	return outputs.SuccessNet(true, config.BatchSize, config.RetryLimit, clients)
 }
-
